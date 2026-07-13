@@ -1,0 +1,15 @@
+# Prediction/predownloaded files
+*.appimage
+*.AppImage
+abacusai-cli-installer.sh
+
+# Temporary cloned examples
+antigravity-nix-example/
+
+# Nix build outputs
+result
+result-*
+
+# Development environments
+.direnv/
+.env
