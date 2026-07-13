@@ -3,8 +3,9 @@
 *.AppImage
 abacusai-cli-installer.sh
 
-# Temporary cloned examples
+# Temporary cloned examples and scratch files
 antigravity-nix-example/
+scratch/
 
 # Nix build outputs
 result
