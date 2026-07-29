@@ -1,12 +1,12 @@
 {
   "AbacusAI Desktop": {
     "x86_64-linux": {
-      "url": "https://github.com/abacusai/deepagent-releases/releases/download/1.106.22900/AbacusAIDesktop-linux-x64-1.106.22900.AppImage",
-      "hash": "0l7khl7nxs0nlhn76g9nlvajzjccahmcjmf7n3c77l2w1i3z5fd2"
+      "url": "https://github.com/abacusai/deepagent-releases/releases/download/2.0.0/AbacusAIDesktop-linux-x64-2.0.0.AppImage",
+      "hash": "0rsgr7n1qwnz5nisdmwlk4pl93s1pvgzmzdc75rg8i213x1v9qj4"
     },
     "aarch64-linux": {
-      "url": "https://github.com/abacusai/deepagent-releases/releases/download/1.106.22900/AbacusAIDesktop-linux-arm64-1.106.22900.AppImage",
-      "hash": "1rayc9asbw5v8ndmac2gc8rvc53ik2s3m39gxyd4mkczbw0gl0b9"
+      "url": "https://github.com/abacusai/deepagent-releases/releases/download/2.0.0/AbacusAIDesktop-linux-arm64-2.0.0.AppImage",
+      "hash": "0y8w9yamag0qr779w19j6x9gk9c59nchxcddb36259q04pk6sfd8"
     }
   },
   "AbacusAI CLI": {
