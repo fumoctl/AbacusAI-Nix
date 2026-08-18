@@ -1,0 +1,95 @@
+name: Create Release
+
+on:
+  # Trigger when Update workflow completes (bypasses GITHUB_TOKEN limitation)
+  workflow_run:
+    workflows: ["Update Abacus AI"]
+    types:
+      - completed
+  # Trigger for direct pushes / PR merges touching versions.json
+  push:
+    branches:
+      - main
+    paths:
+      - "artifacts/versions.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if release needed
+        id: release_check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          extract_version() {
+            local name="$1"
+            local url
+            url=$(jq -r ".\"$name\".\"x86_64-linux\".url" artifacts/versions.json 2>/dev/null || echo "")
+            if [[ "$name" == "AbacusAI Desktop" ]]; then
+              echo "$url" | grep -oP 'download/\K[0-9.]+' || echo "unknown"
+            else
+              echo "$url" | grep -oP 'releases/\K[0-9.]+' || echo "unknown"
+            fi
+          }
+          DESKTOP_VERSION=$(extract_version "AbacusAI Desktop")
+          CLI_VERSION=$(extract_version "AbacusAI CLI")
+          TAG_NAME="v${DESKTOP_VERSION}-${CLI_VERSION}"
+          
+          echo "desktop_version=$DESKTOP_VERSION" >> "$GITHUB_OUTPUT"
+          echo "cli_version=$CLI_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "Versions — Desktop: $DESKTOP_VERSION, CLI: $CLI_VERSION, Tag: $TAG_NAME"
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG_NAME already exists, skipping"
+          else
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG_NAME does not exist, will create"
+          fi
+
+      - name: Create release
+        if: steps.release_check.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.release_check.outputs.tag_name }}
+          DESKTOP_VERSION: ${{ steps.release_check.outputs.desktop_version }}
+          CLI_VERSION: ${{ steps.release_check.outputs.cli_version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG_NAME" -m "Abacus AI Desktop v$DESKTOP_VERSION / CLI v$CLI_VERSION"
+          git push origin "$TAG_NAME"
+          gh release create "$TAG_NAME" \
+            --title "Abacus AI (Desktop v$DESKTOP_VERSION / CLI v$CLI_VERSION)" \
+            --notes "Auto-updated Abacus AI packages.
+
+          | Component | Version |
+          | --- | --- |
+          | Abacus AI Desktop (\`abacusai-desktop\`) | $DESKTOP_VERSION |
+          | Abacus AI CLI (\`abacusai-cli\`) | $CLI_VERSION |
+
+          ## Installation
+          \`\`\`nix
+          inputs.abacusai-nix.url = \"github:fumoctl/AbacusAI-Nix/$TAG_NAME\";
+          \`\`\`
+
+          ## Notes
+          - 📦 Multi-platform: Linux (x86_64, aarch64)
+          - ✅ Hashes verified by build before release"
+          echo "✓ Created release $TAG_NAME"

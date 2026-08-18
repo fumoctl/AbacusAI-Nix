@@ -45,7 +45,13 @@ check_app() {
 
     local latest=""
     if [[ "$name" == "AbacusAI Desktop" ]]; then
-        latest=$(curl -sL "https://api.github.com/repos/abacusai/deepagent-releases/releases/latest" | jq -r '.tag_name' 2>/dev/null || echo "")
+        local auth_header=()
+        if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+            auth_header=(-H "Authorization: Bearer $GITHUB_TOKEN")
+        elif [[ -n "${GH_TOKEN:-}" ]]; then
+            auth_header=(-H "Authorization: Bearer $GH_TOKEN")
+        fi
+        latest=$(curl -sL "${auth_header[@]}" "https://api.github.com/repos/abacusai/deepagent-releases/releases/latest" | jq -r '.tag_name' 2>/dev/null || echo "")
     else
         latest=$(curl -sL "https://apps.abacus.ai/api/v0/_getCodellmCliVersion?channel=latest" | jq -r '.result.version' 2>/dev/null || echo "")
     fi

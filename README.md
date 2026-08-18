@@ -2,7 +2,7 @@
 
 A Nix Flake packaging the [Abacus AI Desktop application](https://github.com/abacusai/deepagent-releases) and the [Abacus AI CLI tool](https://static.abacus.ai/cli/install.sh) for NixOS and Linux systems. 
 
-Supports both `x86_64-linux` (amd64) and `aarch64-linux` (arm64) architectures.
+Supports both `x86_64-linux` (amd64) and `aarch64-linux` (arm64) architectures with automated daily updates via GitHub Actions.
 
 ---
 

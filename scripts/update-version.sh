@@ -17,7 +17,13 @@ fi
 
 # 1. Fetch latest desktop version from github releases
 log_info "Fetching latest Abacus AI Desktop version..."
-DESKTOP_VER=$(curl -sL "https://api.github.com/repos/abacusai/deepagent-releases/releases/latest" | jq -r '.tag_name')
+AUTH_HEADER=()
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    AUTH_HEADER=(-H "Authorization: Bearer $GITHUB_TOKEN")
+elif [[ -n "${GH_TOKEN:-}" ]]; then
+    AUTH_HEADER=(-H "Authorization: Bearer $GH_TOKEN")
+fi
+DESKTOP_VER=$(curl -sL "${AUTH_HEADER[@]}" "https://api.github.com/repos/abacusai/deepagent-releases/releases/latest" | jq -r '.tag_name')
 
 # 2. Fetch latest CLI version from API
 log_info "Fetching latest Abacus AI CLI version..."

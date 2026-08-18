@@ -56,13 +56,26 @@ The Desktop app is distributed as an AppImage.
 
 ## Update and Maintenance Workflows
 
-### How to Check for Updates
+### Automated CI/CD & Updates (GitHub Actions)
+The repository uses GitHub Actions for automated maintenance:
+* **`.github/workflows/update.yml`**: Scheduled daily at 07:00 UTC (and manual via `workflow_dispatch`). Checks upstream for new Desktop and CLI releases, updates `artifacts/versions.json`, verifies builds (`nix flake check` & `nix build`), and opens a PR with auto-merge enabled.
+* **`.github/workflows/ci.yml`**: Runs on pushes and pull requests to `main` to verify flake checks and builds.
+* **`.github/workflows/release.yml`**: Creates versioned GitHub releases and git tags when updates land on `main`.
+* **`.github/workflows/cleanup-branches.yml`**: Cleans up merged `auto-update/*` branches weekly or upon PR merge.
+
+Manual workflow triggers:
+```bash
+# Trigger the update workflow manually
+gh workflow run update.yml
+```
+
+### How to Check for Updates Locally
 To check if a newer version of the Desktop or CLI is available upstream:
 ```bash
 nix shell .# -c ./scripts/check-version.sh
 ```
 
-### How to Update Versions
+### How to Update Versions Locally
 To fetch the latest versions, download their binaries, compute hashes, and update `artifacts/versions.json`:
 ```bash
 nix shell .# -c ./scripts/update-version.sh
