@@ -11,12 +11,12 @@
   },
   "AbacusAI CLI": {
     "x86_64-linux": {
-      "url": "https://static.abacus.ai/cli/releases/2.8.0/abacusai-linux-x64.tar.gz",
-      "hash": "07b8k8wl84jyq2m95fidfjc3r5zakp4b97k0667ahxy5gv13pq8g"
+      "url": "https://static.abacus.ai/cli/releases/2.10.0/abacusai-linux-x64.tar.gz",
+      "hash": "0hyl1ca736bn9fxkknsc7jnv60yppzaxgpf1wip6dn2cnnqwh1b6"
     },
     "aarch64-linux": {
-      "url": "https://static.abacus.ai/cli/releases/2.8.0/abacusai-linux-arm64.tar.gz",
-      "hash": "068nd58p07ghqi46swch25rbgsj380c6avddi3mx5q2ncxr98q8q"
+      "url": "https://static.abacus.ai/cli/releases/2.10.0/abacusai-linux-arm64.tar.gz",
+      "hash": "03c41dcjlmvbmaik6vfzh642zwxmvv6wk8gfq3hqspsxckjrjiky"
     }
   }
 }
