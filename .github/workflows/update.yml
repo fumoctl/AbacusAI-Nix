@@ -43,7 +43,11 @@ jobs:
           set -o pipefail
           chmod +x scripts/update-version.sh
           # Capture output and show it for debugging
-          if ./scripts/update-version.sh 2>&1 | tee update_output.txt; then
+          set +e
+          ./scripts/update-version.sh 2>&1 | tee update_output.txt
+          update_status=${PIPESTATUS[0]}
+          set -e
+          if [[ "$update_status" -eq 0 ]]; then
             echo "update_success=true" >> "$GITHUB_OUTPUT"
             # Check if versions.json was modified
             if git diff --quiet artifacts/versions.json; then
@@ -71,7 +75,7 @@ jobs:
             echo "update_success=false" >> "$GITHUB_OUTPUT"
             echo "=== Update script failed ==="
             cat update_output.txt
-            exit 1
+            exit "$update_status"
           fi
 
       - name: Verify packages build
