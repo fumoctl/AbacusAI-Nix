@@ -60,10 +60,11 @@ process_desktop() {
             IFS=':' read -r nix_os api_arch <<< "$plat"
             log_info "Prefetching hash for Desktop ($nix_os)..."
             local asset_name="AbacusAIDesktop-linux-${api_arch}.AppImage"
+            local legacy_asset_name="AbacusAIDesktop-linux-${api_arch}-${DESKTOP_VER}.AppImage"
             local url
-            url=$(jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .browser_download_url' <<< "$DESKTOP_RELEASE")
+            url=$(jq -r --arg name "$asset_name" --arg legacy_name "$legacy_asset_name"                 '.assets[] | select(.name == $name or .name == $legacy_name) | .browser_download_url'                 <<< "$DESKTOP_RELEASE" | head -n 1)
             if [[ -z "$url" || "$url" == "null" ]]; then
-                log_error "Release $DESKTOP_VER has no $asset_name asset"
+                log_error "Release $DESKTOP_VER has no $asset_name or $legacy_asset_name asset"
                 exit 1
             fi
             local hash=$(get_hash "$url")
