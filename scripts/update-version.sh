@@ -23,7 +23,8 @@ if [[ -n "${GITHUB_TOKEN:-}" ]]; then
 elif [[ -n "${GH_TOKEN:-}" ]]; then
     AUTH_HEADER=(-H "Authorization: Bearer $GH_TOKEN")
 fi
-DESKTOP_VER=$(curl -sL "${AUTH_HEADER[@]}" "https://api.github.com/repos/abacusai/deepagent-releases/releases/latest" | jq -r '.tag_name')
+DESKTOP_RELEASE=$(curl -fsSL "${AUTH_HEADER[@]}" "https://api.github.com/repos/abacusai/deepagent-releases/releases/latest")
+DESKTOP_VER=$(jq -r '.tag_name' <<< "$DESKTOP_RELEASE")
 
 # 2. Fetch latest CLI version from API
 log_info "Fetching latest Abacus AI CLI version..."
@@ -40,7 +41,11 @@ get_hash() {
 # Process desktop app
 process_desktop() {
     local current_url=$(jq -r '."AbacusAI Desktop"."x86_64-linux".url' "$OUTPUT_JSON" 2>/dev/null || echo "null")
-    local current_version=$(echo "$current_url" | grep -oP 'download/\K[0-9.]+' || echo "unknown")
+    local current_version
+    current_version=$(jq -r '."AbacusAI Desktop".version // empty' "$OUTPUT_JSON" 2>/dev/null)
+    if [[ -z "$current_version" ]]; then
+        current_version=$(echo "$current_url" | grep -oP 'download/\K[0-9.]+' || echo "unknown")
+    fi
 
     if [[ "$current_version" == "$DESKTOP_VER" ]]; then
         log_info "AbacusAI Desktop is already at latest version ($DESKTOP_VER). Skipping..."
@@ -54,7 +59,13 @@ process_desktop() {
         for plat in "${platforms[@]}"; do
             IFS=':' read -r nix_os api_arch <<< "$plat"
             log_info "Prefetching hash for Desktop ($nix_os)..."
-            local url="https://github.com/abacusai/deepagent-releases/releases/download/${DESKTOP_VER}/AbacusAIDesktop-linux-${api_arch}-${DESKTOP_VER}.AppImage"
+            local asset_name="AbacusAIDesktop-linux-${api_arch}.AppImage"
+            local url
+            url=$(jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .browser_download_url' <<< "$DESKTOP_RELEASE")
+            if [[ -z "$url" || "$url" == "null" ]]; then
+                log_error "Release $DESKTOP_VER has no $asset_name asset"
+                exit 1
+            fi
             local hash=$(get_hash "$url")
             if [[ -z "$hash" ]]; then
                 log_error "Failed to prefetch hash for $url"
@@ -64,7 +75,8 @@ process_desktop() {
                 '.[$plat] = {url: $url, hash: $hash}')
         done
         local tmp_json=$(mktemp)
-        jq --argjson payload "$payload" '.["AbacusAI Desktop"] = $payload' "$OUTPUT_JSON" > "$tmp_json"
+        jq --arg version "$DESKTOP_VER" --argjson payload "$payload" \
+            '.["AbacusAI Desktop"] = ($payload + {version: $version})' "$OUTPUT_JSON" > "$tmp_json"
         mv "$tmp_json" "$OUTPUT_JSON"
     fi
 }
@@ -72,7 +84,11 @@ process_desktop() {
 # Process CLI
 process_cli() {
     local current_url=$(jq -r '."AbacusAI CLI"."x86_64-linux".url' "$OUTPUT_JSON" 2>/dev/null || echo "null")
-    local current_version=$(echo "$current_url" | grep -oP 'releases/\K[0-9.]+' || echo "unknown")
+    local current_version
+    current_version=$(jq -r '."AbacusAI CLI".version // empty' "$OUTPUT_JSON" 2>/dev/null)
+    if [[ -z "$current_version" ]]; then
+        current_version=$(echo "$current_url" | grep -oP 'releases/\K[0-9.]+' || echo "unknown")
+    fi
 
     if [[ "$current_version" == "$CLI_VER" ]]; then
         log_info "AbacusAI CLI is already at latest version ($CLI_VER). Skipping..."
@@ -96,7 +112,8 @@ process_cli() {
                 '.[$plat] = {url: $url, hash: $hash}')
         done
         local tmp_json=$(mktemp)
-        jq --argjson payload "$payload" '.["AbacusAI CLI"] = $payload' "$OUTPUT_JSON" > "$tmp_json"
+        jq --arg version "$CLI_VER" --argjson payload "$payload" \
+            '.["AbacusAI CLI"] = ($payload + {version: $version})' "$OUTPUT_JSON" > "$tmp_json"
         mv "$tmp_json" "$OUTPUT_JSON"
     fi
 }
