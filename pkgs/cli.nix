@@ -11,10 +11,9 @@ let
 
   platformInfo = versions."AbacusAI CLI".${system} or (throw "Unsupported system for AbacusAI CLI: ${system}");
 
-  # Extract version from URL
-  version = let
+  version = platformInfo.version or (let
     match = builtins.match ".*/releases/([0-9.]+)/.*" platformInfo.url;
-  in if match != null then builtins.elemAt match 0 else "unknown";
+  in if match != null then builtins.elemAt match 0 else "unknown");
 in
 stdenv.mkDerivation {
   inherit pname version;

@@ -40,6 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -o pipefail
           chmod +x scripts/update-version.sh
           # Capture output and show it for debugging
           if ./scripts/update-version.sh 2>&1 | tee update_output.txt; then

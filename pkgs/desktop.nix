@@ -13,9 +13,9 @@ let
 
   platformInfo = versions."AbacusAI Desktop".${system} or (throw "Unsupported system for AbacusAI Desktop: ${system}");
 
-  version = let
+  version = platformInfo.version or (let
     match = builtins.match ".*/download/([0-9.]+)/.*" platformInfo.url;
-  in if match != null then builtins.elemAt match 0 else "unknown";
+  in if match != null then builtins.elemAt match 0 else "unknown");
 
   src = fetchurl {
     inherit (platformInfo) url;
