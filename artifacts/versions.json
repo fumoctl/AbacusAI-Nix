@@ -12,13 +12,13 @@
   },
   "AbacusAI CLI": {
     "x86_64-linux": {
-      "url": "https://static.abacus.ai/cli/releases/2.10.24/abacusai-linux-x64.tar.gz",
-      "hash": "121lhxjr9x4wkijfzjr217102cd22iyhbamkd1xxq1jv68wggsg5"
+      "url": "https://static.abacus.ai/cli/releases/2.10.25/abacusai-linux-x64.tar.gz",
+      "hash": "15gk1y99yg815lhi9kbiaibrp8d51np16n7r03vs9pj92166iz1d"
     },
     "aarch64-linux": {
-      "url": "https://static.abacus.ai/cli/releases/2.10.24/abacusai-linux-arm64.tar.gz",
-      "hash": "031f6gyc6pgn83iizmrrr5kkgq46w5sn65rq07kd4mslzcvwbm77"
+      "url": "https://static.abacus.ai/cli/releases/2.10.25/abacusai-linux-arm64.tar.gz",
+      "hash": "1mkqdchgxzjqpz6pwq22klakwxmdiadwh22azngclw6hd0yw9x3d"
     },
-    "version": "2.10.24"
+    "version": "2.10.25"
   }
 }
